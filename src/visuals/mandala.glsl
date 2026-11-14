@@ -8,8 +8,16 @@ vec3 hexTile(vec2 p, float t) {
   tri = mix(tri, 1.0 - tri, flipped);
   float barycentric = 1.0 - tri.x - tri.y;
 
-  // Only one triangle in each repeating group uses the tracked head crop.
-  float tile = mod(cell.x - cell.y + flipped * 3.0, 6.0);
+  // Choose one of three lattice-vertex colors as the center of each hexagon.
+  // Every lattice triangle has exactly one vertex of this color.
+  vec2 anchor = cell + flipped;
+  float vertexColor = mod(anchor.x - anchor.y, 3.0);
+  vec2 center = anchor;
+  if (vertexColor == 1.0) center += mix(vec2(0.0, 1.0), vec2(-1.0, 0.0), flipped);
+  if (vertexColor == 2.0) center += mix(vec2(1.0, 0.0), vec2(0.0, -1.0), flipped);
+  vec2 offset = anchor + (1.0 - 2.0 * flipped) / 3.0 - center;
+  vec2 direction = vec2(offset.x + 0.5 * offset.y, 0.8660254 * offset.y);
+  float tile = floor(mod(atan(direction.y, direction.x), TAU) * 6.0 / TAU);
   vec2 tileUv = vec2(tri.x + 0.5 * tri.y, tri.y);
   vec2 drift = vec2(0.11 * sin(t * 0.63), 0.09 * cos(t * 0.55));
   vec2 faceUv = vec2((tileUv.x - 0.5) * 1.6 + 0.5, (1.0 - tileUv.y) * 0.96) + drift;
@@ -28,7 +36,7 @@ vec2 fold(vec2 p, float segments) {
 vec3 border(vec2 p, float t, float spin) {
   vec2 q = rotate(spin * t) * p;
   vec2 tile = mirrorTile(q * 9.0 + vec2(t * 0.27, -t * 0.19));
-  vec3 color = source(vec2(0.23, 0.72) + (tile - 0.5) * vec2(0.12, 0.12 * uSource.x / uSource.y));
+  vec3 color = source(vec2(0.23, 0.72) + (tile - 0.5) * vec2(0.17, 0.17 * uSource.x / uSource.y));
   return color * (0.62 + 0.26 * sin(12.0 * length(p) - t * 0.58));
 }
 

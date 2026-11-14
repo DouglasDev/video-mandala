@@ -27,7 +27,7 @@ vec2 mirrorTile(vec2 p) {
 vec3 source(vec2 uv) {
   uv = mirrorTile(uv);
   if (uCamera > 0.5) {
-    return texture2D(uVideo, vec2(1.0 - uv.x, uv.y)).rgb;
+    return texture2D(uVideo, vec2(1.0 - uv.x, 1.0 - uv.y)).rgb;
   }
 
   // An animated synthetic source with enough contrast to read the relief.
